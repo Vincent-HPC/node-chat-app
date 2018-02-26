@@ -16,6 +16,28 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     console.log('New user connected');
 
+    // this is not a listener so not goning to provide a callback func.
+    socket.emit('newEmail', {
+        from: 'mike@example.com',
+        text: 'Hey. What is going on.',
+        createAt: 123
+    });
+
+    // we can use an arrow func cuz in our node code.
+    socket.on('createEmail', (newEmail) => {
+        console.log('createEmail', newEmail);
+    });
+
+    socket.emit('newMessage', {
+        from: 'Jack',
+        text: 'This message is sent from Server',
+        createdAt: new Date().getTime()
+    });
+
+    socket.on('createMessage', (newMessage) => {
+        console.log('createMessage', newMessage, new Date().getTime());
+    });
+
     socket.on('disconnect', () => {
         console.log('Disconnected from server');
     });
