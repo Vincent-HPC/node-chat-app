@@ -41,12 +41,20 @@ socket.on('newMessage', function(message) {
     jQuery('#messages').append(li);
 });
 
-// socket.emit('createMessage', {
-//     from: 'Frank',
-//     text: 'Hi'
-// }, function(data) {
-//     console.log('Got it', data);
-// });
+socket.on('newLocationMessage', function(message) {
+    var li = jQuery('<li></li>');
+    // target="_blank" -> tell the browser to open up to URL any new tab
+    var a = jQuery('<a target="_blank">My current location</a>');
+
+    li.text(`${message.from}: `);
+    // u can set and fetch attributes on jQuery selected elements
+    a.attr('href', message.url); //<-- set the herf attr. of a
+    // This way prevents any malicious behavior if someone tries to inject html
+    // they shouldn't be injecting.
+
+    li.append(a);
+    jQuery('#messages').append(li);
+});
 
 jQuery('#message-form').on('submit', function(e) {
     e.preventDefault();
@@ -56,5 +64,27 @@ jQuery('#message-form').on('submit', function(e) {
         text: jQuery('[name=message]').val()
     }, function() {
 
+    });
+});
+
+var locationButton = jQuery('#send-location');
+
+// same as jQuery('#send-location'), but above line save time!
+locationButton.on('click', function() {
+    if (!navigator.geolocation) {
+        return alert('Geolocation not supported by your browser.');
+    } //  https://developer.mozilla.org/zh-TW/docs/Web/API/Geolocation/Using_geolocation
+
+    // It will actively get the coordinates for the user.
+    // In this case it's going to find the coordinates based of the browser.
+    // 1st: success func. ,get called within the location info.(postition)
+    // 2nd: error func. ,error handler if something goes wrong
+    navigator.geolocation.getCurrentPosition(function(position) {
+        socket.emit('createLocationMessage', {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        });
+    }, function() {
+        alert('Unable to fetch location.');
     });
 });
