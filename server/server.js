@@ -44,9 +44,28 @@ io.on('connection', (socket) => {
     // socket.broadcast.emit from Admin text New user joined
     socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
-    socket.on('createMessage', (message) => {
+    // ************************************************ //
+    // https://socket.io/docs/#sending-and-getting-data-(acknowledgements)
+    //
+    //
+    // socket.on('formData',
+    //               function(data, fn){
+    //                       // data is your form data from the client side
+    //                       // we are here so we got it successfully so call client callback
+    //                       // incidentally(not needed in this case) send back data value true
+    //                       fn(true);
+    //               }
+    //              );
+    //
+    // ************************************************ //
+
+
+
+    socket.on('createMessage', (message, callback) => {
         console.log('createMessage', message);
         io.emit('newMessage', generateMessage(message.from, message.text));
+        callback('This is from the server.');
+
         // socket.broadcast.emit('newMessage', {
         //     from: message.from,
         //     text: message.text,

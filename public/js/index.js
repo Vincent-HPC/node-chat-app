@@ -32,4 +32,29 @@ socket.on('disconnect', function() {
 
 socket.on('newMessage', function(message) {
     console.log('New message', message);
+    //Using jQuery to create an element, modify that element
+    //and markup making it visible
+    var li = jQuery('<li></li>');
+    li.text(`${message.from}: ${message.text}`);
+
+    //use a query to select that new element we created, append to the ID of "messages"
+    jQuery('#messages').append(li);
+});
+
+// socket.emit('createMessage', {
+//     from: 'Frank',
+//     text: 'Hi'
+// }, function(data) {
+//     console.log('Got it', data);
+// });
+
+jQuery('#message-form').on('submit', function(e) {
+    e.preventDefault();
+
+    socket.emit('createMessage', {
+        from: 'User',
+        text: jQuery('[name=message]').val()
+    }, function() {
+
+    });
 });
