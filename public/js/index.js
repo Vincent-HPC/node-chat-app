@@ -59,11 +59,13 @@ socket.on('newLocationMessage', function(message) {
 jQuery('#message-form').on('submit', function(e) {
     e.preventDefault();
 
+    var messageTextbox = jQuery('[name=message]');
+
     socket.emit('createMessage', {
         from: 'User',
-        text: jQuery('[name=message]').val()
+        text: messageTextbox.val()
     }, function() {
-
+        messageTextbox.val(''); //clean up the message which has send
     });
 });
 
@@ -75,16 +77,21 @@ locationButton.on('click', function() {
         return alert('Geolocation not supported by your browser.');
     } //  https://developer.mozilla.org/zh-TW/docs/Web/API/Geolocation/Using_geolocation
 
+    locationButton.attr('disabled', 'disabled').text('Sending Location...');
+
     // It will actively get the coordinates for the user.
     // In this case it's going to find the coordinates based of the browser.
     // 1st: success func. ,get called within the location info.(postition)
     // 2nd: error func. ,error handler if something goes wrong
     navigator.geolocation.getCurrentPosition(function(position) {
+        locationButton.removeAttr('disabled').text('Send Location');
         socket.emit('createLocationMessage', {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
         });
     }, function() {
+        // if user denied for location request, reset and still want user try again
+        locationButton.removeAttr('disabled').text('Send Location');
         alert('Unable to fetch location.');
     });
 });
