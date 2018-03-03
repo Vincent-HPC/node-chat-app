@@ -31,22 +31,25 @@ socket.on('disconnect', function() {
 // });
 
 socket.on('newMessage', function(message) {
-    console.log('New message', message);
+    var formattedTime = moment(message.createdAt).format('h:mm a');
+
     //Using jQuery to create an element, modify that element
     //and markup making it visible
     var li = jQuery('<li></li>');
-    li.text(`${message.from}: ${message.text}`);
+    li.text(`${message.from} ${formattedTime}: ${message.text}`);
 
     //use a query to select that new element we created, append to the ID of "messages"
     jQuery('#messages').append(li);
 });
 
 socket.on('newLocationMessage', function(message) {
+    var formattedTime = moment(message.createdAt).format('h:mm a');
+
     var li = jQuery('<li></li>');
     // target="_blank" -> tell the browser to open up to URL any new tab
     var a = jQuery('<a target="_blank">My current location</a>');
 
-    li.text(`${message.from}: `);
+    li.text(`${message.from} ${formattedTime}: `);
     // u can set and fetch attributes on jQuery selected elements
     a.attr('href', message.url); //<-- set the herf attr. of a
     // This way prevents any malicious behavior if someone tries to inject html
