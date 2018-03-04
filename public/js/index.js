@@ -1,5 +1,23 @@
 var socket = io();
 
+function scrollToBottom() {
+    // Selectors
+    var message = jQuery('#messages');
+    var newMessage = message.children('li:last-child'); // let u write a selector specific to the children of the message
+    // Heights
+    var clientHeight = message.prop('clientHeight');
+    // call a prop method whcih gives us a cross-browser way to fetch a property
+    var scrollTop = message.prop('scrollTop');
+    var scrollHeight = message.prop('scrollHeight');
+    var newMessageHeight = newMessage.innerHeight(); //this will calculate the height of the message taking into account the padding
+    var lastMessageHeight = newMessage.prev().innerHeight();
+
+    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+        // scrollTop() is the jQuery method for setting that scroll top value
+        message.scrollTop(scrollHeight); // move to the bottom of the msg area over inside of browser
+    }
+}
+
 // same as in server.js
 // () no socket arg. since we already have it above
 // change arrow func to normal func form,deu to make sure
@@ -40,6 +58,7 @@ socket.on('newMessage', function(message) {
     });
 
     jQuery('#messages').append(html);
+    scrollToBottom();
 
 
     // // Using jQuery to create an element, modify that element
@@ -61,6 +80,7 @@ socket.on('newLocationMessage', function(message) {
     });
 
     jQuery('#messages').append(html);
+    scrollToBottom();
 
 
     // var li = jQuery('<li></li>');
