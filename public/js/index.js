@@ -32,31 +32,49 @@ socket.on('disconnect', function() {
 
 socket.on('newMessage', function(message) {
     var formattedTime = moment(message.createdAt).format('h:mm a');
+    var template = jQuery('#message-template').html();
+    var html = Mustache.render(template, {
+        text: message.text,
+        from: message.from,
+        createdAt: formattedTime
+    });
 
-    //Using jQuery to create an element, modify that element
-    //and markup making it visible
-    var li = jQuery('<li></li>');
-    li.text(`${message.from} ${formattedTime}: ${message.text}`);
+    jQuery('#messages').append(html);
 
-    //use a query to select that new element we created, append to the ID of "messages"
-    jQuery('#messages').append(li);
+
+    // // Using jQuery to create an element, modify that element
+    // // and markup making it visible
+    // var li = jQuery('<li></li>');
+    // li.text(`${message.from} ${formattedTime}: ${message.text}`);
+
+    // //use a query to select that new element we created, append to the ID of "messages"
+    // jQuery('#messages').append(li);
 });
 
 socket.on('newLocationMessage', function(message) {
     var formattedTime = moment(message.createdAt).format('h:mm a');
+    var template = jQuery('#location-message-template').html();
+    var html = Mustache.render(template, {
+        from: message.from,
+        url: message.url,
+        createdAt: formattedTime
+    });
 
-    var li = jQuery('<li></li>');
-    // target="_blank" -> tell the browser to open up to URL any new tab
-    var a = jQuery('<a target="_blank">My current location</a>');
+    jQuery('#messages').append(html);
 
-    li.text(`${message.from} ${formattedTime}: `);
-    // u can set and fetch attributes on jQuery selected elements
-    a.attr('href', message.url); //<-- set the herf attr. of a
-    // This way prevents any malicious behavior if someone tries to inject html
-    // they shouldn't be injecting.
 
-    li.append(a);
-    jQuery('#messages').append(li);
+    // var li = jQuery('<li></li>');
+    // // target="_blank" -> tell the browser to open up to URL any new tab
+    // var a = jQuery('<a target="_blank">My current location</a>');
+    //
+    // li.text(`${message.from} ${formattedTime}: `);
+    // // u can set and fetch attributes on jQuery selected elements
+    // a.attr('href', message.url); //<-- set the herf attr. of a
+    // // This way prevents any malicious behavior if someone tries to inject html
+    // // they shouldn't be injecting.
+    //
+    // li.append(a);
+    // jQuery('#messages').append(li);
 });
 
 jQuery('#message-form').on('submit', function(e) {
