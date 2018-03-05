@@ -8,6 +8,12 @@ const {
     generateMessage,
     generateLocationMessage
 } = require('./utils/message');
+const {
+    isRealString
+} = require('./utils/validation');
+const {
+    Users
+} = require('./utils/users');
 // console.log(__dirname + '/../public');
 // console.log(publicPath);
 const publicPath = path.join(__dirname, '../public');
@@ -15,35 +21,33 @@ const port = process.env.PORT || 3000;
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
+var users = new Users();
 
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
     console.log('New user connected');
 
-    // // this is not a listener so not goning to provide a callback func.
-    // socket.emit('newEmail', {
-    //     from: 'mike@example.com',
-    //     text: 'Hey. What is going on.',
-    //     createAt: 123
-    // });
-    //
-    // // we can use an arrow func cuz in our node code.
-    // socket.on('createEmail', (newEmail) => {
-    //     console.log('createEmail', newEmail);
-    // });
-    //
-    // socket.emit('newMessage', {
-    //     from: 'Jack',
-    //     text: 'This message is sent from Server',
-    //     createdAt: new Date().getTime()
-    // });
+    socket.on('join', (params, callback) => {
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            return callback('Name and room name are required.');
+        }
 
+        socket.join(params.room); //have to join by string value
+        // socket.leave('The Office Fans');
+        users.removeUser(socket.id);
+        users.addUser(socket.id, params.name, params.room);
 
-    // socket.emit from Admin text Welcome to the chat app
-    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-    // socket.broadcast.emit from Admin text New user joined
-    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
+        // TWO way to specific room
+        // io.emit -> io.to('The Office Fans').emit // chain on a call to emit, will send an event to everybody connected to a room
+        // socket.broadcast.emit -> socket.broadcast.to('The Office Fans').emit
+
+        // socket.emit
+        io.to(params.room).emit('updateUserList', users.getUserList(params.room));
+        socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+        socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
+        callback();
+    });
 
     // ************************************************ //
     // https://socket.io/docs/#sending-and-getting-data-(acknowledgements)
@@ -73,7 +77,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('Disconnected from server');
+        var user = users.removeUser(socket.id);
+
+        if (user) {
+            io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+            io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left. `));
+        }
     });
 });
 

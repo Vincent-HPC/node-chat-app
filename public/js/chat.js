@@ -23,30 +23,31 @@ function scrollToBottom() {
 // change arrow func to normal func form,deu to make sure
 // it works on safari. firefox, mobile client
 socket.on('connect', function() {
-    console.log('Connected to server');
+    var params = jQuery.deparam(window.location.search);
 
-    // // call emit right here inside of connect callback func.
-    // // cuz don't want emit the event until we are connected socket.
-    // // Can pass any data in as the second argument.
-    // socket.emit('createEmail', {
-    //     to: 'jen@example.com',
-    //     text: 'Hey. This is Andrew.'
-    // });
-    //
-    // // When emmiting a custom events, 1st arg. is the event name, 2nd is the data
-    // socket.emit('createMessage', {
-    //     from: 'jen',
-    //     text: 'This message is sent from cliet'
-    // });
+    socket.emit('join', params, function(err) {
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('No error');
+        }
+    })
 });
 
 socket.on('disconnect', function() {
     console.log('Disconnected from server');
 });
 
-// socket.on('newEmail', function(email) {
-//     console.log('New email', email);
-// });
+socket.on('updateUserList', function(users) {
+    var ol = jQuery('<ol></ol>'); //orderList
+
+    users.forEach(function(user) {
+        ol.append(jQuery('<li></li>').text(user));
+    });
+
+    jQuery('#users').html(ol);
+})
 
 socket.on('newMessage', function(message) {
     var formattedTime = moment(message.createdAt).format('h:mm a');
